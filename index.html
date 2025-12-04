@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Letter Animation + Overlay</title>
+
+<style>
+/* ---------------------------------------------------------- */
+/* BACKGROUND */
+/* ---------------------------------------------------------- */
+body {
+    background: #323641;
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    font-family: system-ui;
+}
+
+/* ---------------------------------------------------------- */
+/* MAIL ANIMATION (converted from your SASS → pure CSS) */
+/* ---------------------------------------------------------- */
+.letter-image {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+}
+
+.animated-mail {
+    position: absolute;
+    height: 150px;
+    width: 200px;
+    transition: .4s;
+}
+
+/* Body triangle */
+.animated-mail .body {
+    position: absolute;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 0 100px 200px;
+    border-color: transparent transparent #e95f55 transparent;
+    z-index: 2;
+}
+
+/* Top flap */
+.animated-mail .top-fold {
+    position: absolute;
+    top: 50px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 50px 100px 0 100px;
+    transform-origin: 50% 0%;
+    transition: transform .4s .4s, z-index .2s .4s;
+    border-color: #cf4a43 transparent transparent transparent;
+    z-index: 2;
+}
+
+/* Back rectangle */
+.animated-mail .back-fold {
+    position: absolute;
+    bottom: 0;
+    width: 200px;
+    height: 100px;
+    background: #cf4a43;
+    z-index: 0;
+}
+
+/* Side fold */
+.animated-mail .left-fold {
+    position: absolute;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 50px 0 50px 100px;
+    border-color: transparent transparent transparent #e15349;
+    z-index: 2;
+}
+
+/* Inner letter */
+.animated-mail .letter {
+    position: absolute;
+    left: 20px;
+    bottom: 0;
+    width: 160px;
+    height: 60px;
+    background: white;
+    z-index: 1;
+    overflow: hidden;
+    transition: .4s .2s;
+}
+
+/* Letter border stripes */
+.animated-mail .letter .letter-border {
+    height: 10px;
+    width: 100%;
+    background: repeating-linear-gradient(
+        -45deg,
+        #cb5a5e,
+        #cb5a5e 8px,
+        transparent 8px,
+        transparent 18px
+    );
+}
+
+/* Title bar */
+.animated-mail .letter .letter-title {
+    margin-top: 10px;
+    margin-left: 5px;
+    height: 10px;
+    width: 40%;
+    background: #cb5a5e;
+}
+
+/* Context bar */
+.animated-mail .letter .letter-context {
+    margin-top: 10px;
+    margin-left: 5px;
+    height: 10px;
+    width: 20%;
+    background: #cb5a5e;
+}
+
+/* Stamp */
+.animated-mail .letter .letter-stamp {
+    margin-top: 30px;
+    margin-left: 120px;
+    border-radius: 100%;
+    height: 30px;
+    width: 30px;
+    background: #cb5a5e;
+    opacity: 0.3;
+}
+
+/* Shadow under envelope */
+.shadow {
+    position: absolute;
+    top: 200px;
+    left: 50%;
+    width: 400px;
+    height: 30px;
+    transform: translateX(-50%);
+    transition: .4s;
+    border-radius: 100%;
+    background: radial-gradient(rgba(0,0,0,0.5), transparent);
+}
+
+/* Hover animation */
+.letter-image:hover .animated-mail {
+    transform: translateY(50px);
+}
+.letter-image:hover .top-fold {
+    transform: rotateX(180deg);
+    transition: transform .4s, z-index .2s;
+    z-index: 0;
+}
+.letter-image:hover .letter {
+    height: 180px;
+}
+.letter-image:hover ~ .shadow {
+    width: 250px;
+}
+
+/* ---------------------------------------------------------- */
+/* OVERLAY */
+/* ---------------------------------------------------------- */
+.overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.55);
+    z-index: 9999;
+}
+.overlay.active {
+    display: flex;
+}
+
+.dimmed {
+    filter: blur(2px) brightness(.85);
+}
+
+/* ---------------------------------------------------------- */
+/* PANELS */
+/* ---------------------------------------------------------- */
+.fullscreen-card,
+.panel {
+    width: min(720px, 92vw);
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+    transition: .3s ease;
+}
+
+.fullscreen-card img {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.btn {
+    padding: 8px 14px;
+    background: #cf4a43;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.panel {
+    opacity: 0;
+    transform: translateY(20px) scale(.95);
+    pointer-events: none;
+}
+.panel.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+</style>
+
+</head>
+<body>
+
+<!-- ========================================================== -->
+<!-- MAIL (YOUR ORIGINAL HTML) -->
+<!-- ========================================================== -->
+<div id="entiremail">
+    <div class="letter-image" id="mail">
+        <div class="animated-mail">
+            <div class="back-fold"></div>
+            <div class="letter">
+                <div class="letter-border"></div>
+                <div class="letter-title"></div>
+                <div class="letter-context"></div>
+                <div class="letter-stamp">
+                    <div class="letter-stamp-inner"></div>
+                </div>
+            </div>
+            <div class="top-fold"></div>
+            <div class="body"></div>
+            <div class="left-fold"></div>
+        </div>
+        <div class="shadow"></div>
+    </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- OVERLAY + STEPS -->
+<!-- ========================================================== -->
+<div class="overlay" id="overlay">
+    
+    <!-- Step 1 -->
+    <div class="fullscreen-card" id="fullscreenCard">
+        <img src="letter.png" id="overlayImage">
+        <button class="btn" id="nextBtn">Next</button>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="panel" id="panel" style="display:none;">
+        <h3>So.. may I ask you a question?</h3>
+        <button class="btn" id="okBtn">Ok!</button>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="panel" id="questionPanel" style="display:none;">
+        <h2 style="color:#cf4a43;">Why Coventry? 😂</h2>
+    </div>
+
+</div>
+
+<script>
+const mail = document.getElementById("mail");
+const overlay = document.getElementById("overlay");
+const entiremail = document.getElementById("entiremail");
+
+const fullscreenCard = document.getElementById("fullscreenCard");
+const panel = document.getElementById("panel");
+const questionPanel = document.getElementById("questionPanel");
+
+const nextBtn = document.getElementById("nextBtn");
+const okBtn = document.getElementById("okBtn");
+
+/* OPEN ANIMATION */
+mail.addEventListener("click", () => {
+    overlay.classList.add("active");
+    entiremail.classList.add("dimmed");
+});
+
+/* NEXT → SHOW PANEL */
+nextBtn.addEventListener("click", () => {
+    fullscreenCard.style.opacity = "0";
+    fullscreenCard.style.transform = "scale(.9)";
+    setTimeout(() => {
+        fullscreenCard.style.display = "none";
+        panel.style.display = "";
+        setTimeout(() => panel.classList.add("visible"), 20);
+    }, 250);
+});
+
+/* OK → SHOW QUESTION */
+okBtn.addEventListener("click", () => {
+    panel.classList.remove("visible");
+    setTimeout(() => {
+        panel.style.display = "none";
+        questionPanel.style.display = "";
+        setTimeout(() => questionPanel.classList.add("visible"), 20);
+    }, 250);
+});
+
+/* CLICK OUTSIDE TO CLOSE */
+overlay.addEventListener("click", e => {
+    if (e.target !== overlay) return;
+    closeAll();
+});
+document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeAll();
+});
+
+function closeAll() {
+    overlay.classList.remove("active");
+    entiremail.classList.remove("dimmed");
+
+    fullscreenCard.style.display = "";
+    fullscreenCard.style.opacity = "1";
+    fullscreenCard.style.transform = "none";
+
+    panel.style.display = "none";
+    panel.classList.remove("visible");
+
+    questionPanel.style.display = "none";
+    questionPanel.classList.remove("visible");
+}
+</script>
+
+</body>
+</html>
